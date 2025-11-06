@@ -1,0 +1,9 @@
+﻿bin/
+obj/
+*.db
+*.user
+*.suo
+*.userosscache
+*.sln.iml
+.vscode/
+*.swp
