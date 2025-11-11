@@ -6,7 +6,7 @@ public class User
     
     // Unikt användarnamn för inloggning
     public string UserName {get; set;} = string.Empty;
-    public string Email {get; set;}
+    public string? Email {get; set;}
 
     // Lagrar bara hash och salt (ingen klartextlösenord)
     public byte[] PasswordHash {get; set;} = System.Array.Empty<byte>();
