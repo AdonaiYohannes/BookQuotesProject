@@ -1,0 +1,54 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">📚 BookQuotes</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
+            aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/books" routerLinkActive="active">
+            <i class="fa fa-book me-1"></i>Böcker
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/my-quotes" routerLinkActive="active">
+            <i class="fa fa-quote-left me-1"></i>Mina citat
+          </a>
+        </li>
+      </ul>
+
+      <div class="d-flex gap-2">
+       
+      <button class="btn btn-outline-light btn-sm theme-btn"
+              (click)="toggleTheme.emit()" type="button"
+              [attr.aria-pressed]="isDark" title="Växla tema">
+        <i class="fa" [ngClass]="isDark ? 'fa-sun' : 'fa-moon'"></i>
+        <span class="d-none d-sm-inline ms-1">{{ isDark ? 'Ljust läge' : 'Mörkt läge' }}</span>
+      </button>
+
+
+
+        
+        <ng-container *ngIf="isBrowser">
+          <ng-container *ngIf="!auth.isAuthenticated(); else authed">
+            <a class="btn btn-outline-light btn-sm" routerLink="/login">
+              <i class="fa fa-right-to-bracket me-1"></i>Logga in
+            </a>
+            <a class="btn btn-warning btn-sm" routerLink="/register">
+              <i class="fa fa-user-plus me-1"></i>Registrera
+            </a>
+          </ng-container>
+
+          <ng-template #authed>
+            <button class="btn btn-danger btn-sm" (click)="logout()">
+              <i class="fa fa-right-from-bracket me-1"></i>Logga ut
+            </button>
+          </ng-template>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</nav>

@@ -7,3 +7,12 @@ obj/
 *.sln.iml
 .vscode/
 *.swp
+
+# Node
+node_modules/
+**/node_modules/
+
+# Angular build
+dist/
+.angular/
+

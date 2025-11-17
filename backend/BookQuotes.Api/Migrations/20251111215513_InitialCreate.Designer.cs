@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookQuotes.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251107132347_InitialCreate")]
+    [Migration("20251111215513_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
 
             modelBuilder.Entity("BookQuotes.Api.Models.Book", b =>
                 {

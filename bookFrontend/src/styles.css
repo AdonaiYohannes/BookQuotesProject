@@ -1,0 +1,28 @@
+:root {
+--bg: #ffffff;
+--fg: #111827;
+--card: #f8f9fa;
+}
+
+
+[data-theme="dark"] {
+--bg: #0f172a;
+--fg: #e5e7eb;
+--card: #111827;
+}
+
+
+body { background: var(--bg); color: var(--fg); }
+.card { background: var(--card); }
+.btn-icon { display: inline-flex; align-items: center; gap: .5rem; }
+.table thead th { white-space: nowrap; }
+
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  border-radius: 9999px;
+  padding-inline: .6rem;
+}
+.theme-btn:hover { opacity: .9; transform: translateY(-1px); }
+.theme-btn:active { transform: translateY(0); }

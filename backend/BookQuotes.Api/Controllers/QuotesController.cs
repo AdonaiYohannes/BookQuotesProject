@@ -41,7 +41,7 @@ public class QuotesController : ControllerBase
         var userId = GetUserId();
         var quotes = await _db.Quotes
             .Where(q => q.UserId == userId)
-            .Select(q => new QuoteDto(q.Id, q.Text, q.Source))
+            .Select(q => new QuoteDto(q.Id, q.Text, q.Author, q.Source))
             .Take(100)
             .ToListAsync();
         return Ok(quotes);
@@ -53,15 +53,20 @@ public class QuotesController : ControllerBase
         var userId = GetUserId();
         var quote = new Quote
         {
-            Text = dto.Text,
-            Source = dto.Source,
+            Text = dto.Text.Trim(),
+            Author = (dto.Author ?? string.Empty).Trim(),
+            Source = dto.Source?.Trim(),
             UserId = userId
         };
 
         _db.Quotes.Add(quote);
         await _db.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetQuotes),
-            new { id = quote.Id }, new QuoteDto(quote.Id, quote.Text, quote.Source));
+
+        return CreatedAtAction(
+            nameof(GetQuotes),
+            new { id = quote.Id }, 
+            new QuoteDto(quote.Id, quote.Text, quote.Author, quote.Source)
+        );
     }
 
     [HttpPut("{id:int}")]
@@ -71,10 +76,13 @@ public class QuotesController : ControllerBase
         var quote = await _db.Quotes.FirstOrDefaultAsync(q => q.Id == id && q.UserId == userId);
         if (quote is null) return NotFound();
 
-        quote.Text = dto.Text;
+        quote.Text = dto.Text.Trim();
+        quote.Author = (dto.Author ?? string.Empty).Trim();
         quote.Source = dto.Source;
+
         await _db.SaveChangesAsync();
-        return Ok(new QuoteDto(quote.Id, quote.Text, quote.Source));
+
+        return Ok(new QuoteDto(quote.Id, quote.Text, quote.Author,quote.Source));
     }
 
     [HttpDelete("{id:int}")]

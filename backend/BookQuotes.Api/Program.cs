@@ -10,17 +10,12 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // ---------- JWT Claim Mapping ----------
-// It keeps the original claim names, so code using "sub" still works.
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
 
 // ---------- SQLite ----------
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
-
-
 
 // ---------- JWT options & Auth ----------
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
@@ -30,7 +25,7 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.MapInboundClaims = false; // ✅ keep "sub" as "sub"
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -38,7 +33,8 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key)
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
         };
     });
 
@@ -55,7 +51,8 @@ builder.Services.AddCors(options =>
         .WithOrigins("http://localhost:4200")
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .AllowCredentials());
+        .AllowCredentials()
+        .WithExposedHeaders("Authorization"));
 });
 
 // ---------- Swagger ----------
@@ -66,7 +63,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
-        Scheme = "bearer",   // Upercase  "Bearer" also works
+        Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Description = "Enter: Bearer {your JWT token}"
@@ -92,8 +89,8 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-
-app.UseCors("ng");
+// ---------- Middleware order ----------
+app.UseCors("ng"); // ✅ Must match AddCors policy name
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -103,8 +100,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Redirect root to swagger
+// Redirect root to Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
-
 
 app.Run();

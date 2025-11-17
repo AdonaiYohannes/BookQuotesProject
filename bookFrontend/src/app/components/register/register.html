@@ -1,0 +1,64 @@
+<h2>Registrera</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="row g-3">
+  <!-- Användarnamn -->
+  <div class="col-12">
+    <label class="form-label">Användarnamn</label>
+    <input type="text" formControlName="UserName" class="form-control" required />
+    <div class="text-danger small"
+         *ngIf="form.get('UserName')?.touched && form.get('UserName')?.invalid">
+      <ng-container *ngIf="form.get('UserName')?.errors?.['required']">Obligatoriskt.</ng-container>
+      <ng-container *ngIf="form.get('UserName')?.errors?.['minlength']">Minst 3 tecken.</ng-container>
+      <ng-container *ngIf="form.get('UserName')?.errors?.['maxlength']">Max 20 tecken.</ng-container>
+      <ng-container *ngIf="form.get('UserName')?.errors?.['taken']">Användarnamnet är upptaget.</ng-container>
+    </div>
+  </div>
+
+  <!-- Email (obligatorisk enligt backend) -->
+  <div class="col-12">
+    <label class="form-label">Email</label>
+    <input type="email" formControlName="Email" class="form-control" required />
+    <div class="text-danger small"
+         *ngIf="form.get('Email')?.touched && form.get('Email')?.invalid">
+      <ng-container *ngIf="form.get('Email')?.errors?.['required']">Obligatoriskt.</ng-container>
+      <ng-container *ngIf="form.get('Email')?.errors?.['email']">Ogiltig e-postadress.</ng-container>
+      <ng-container *ngIf="form.get('Email')?.errors?.['maxlength']">Max 50 tecken.</ng-container>
+      <ng-container *ngIf="form.get('Email')?.errors?.['taken']">E-posten används redan.</ng-container>
+    </div>
+  </div>
+
+  <!-- Lösenord -->
+  <div class="col-12">
+    <label class="form-label">Lösenord</label>
+    <input type="password" formControlName="Password" class="form-control" required />
+    <div class="text-danger small"
+         *ngIf="form.get('Password')?.touched && form.get('Password')?.invalid">
+      <ng-container *ngIf="form.get('Password')?.errors?.['required']">Obligatoriskt.</ng-container>
+      <ng-container *ngIf="form.get('Password')?.errors?.['minlength']">Minst 6 tecken.</ng-container>
+      <ng-container *ngIf="form.get('Password')?.errors?.['maxlength']">Max 20 tecken.</ng-container>
+    </div>
+  </div>
+
+  <!-- Bekräfta lösenord (obligatorisk + match) -->
+  <div class="col-12">
+    <label class="form-label">Bekräfta lösenord</label>
+    <input type="password" formControlName="ConfirmPassword" class="form-control" required />
+    <div class="text-danger small"
+         *ngIf="form.get('ConfirmPassword')?.touched && form.get('ConfirmPassword')?.invalid">
+      <ng-container *ngIf="form.get('ConfirmPassword')?.errors?.['required']">Obligatoriskt.</ng-container>
+    </div>
+    <div class="text-danger small"
+         *ngIf="form.touched && form.errors?.['passwordMismatch']">
+      Lösenorden matchar inte.
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+  <div class="col-12">
+    <button class="btn btn-success w-100" type="submit">
+      <i class="fa fa-user-plus me-1"></i>Skapa konto
+    </button>
+  </div>
+</form>

@@ -1,0 +1,15 @@
+<h2>Logga in</h2>
+<form [formGroup]="form" (ngSubmit)="submit()" class="row g-3">
+<div class="col-12">
+<label class="form-label">Användarnamn</label>
+<input type="text" formControlName="username" class="form-control" required />
+</div>
+<div class="col-12">
+<label class="form-label">Lösenord</label>
+<input type="password" formControlName="password" class="form-control" required />
+</div>
+<div *ngIf="error" class="alert alert-danger">{{error}}</div>
+<div class="col-12">
+<button class="btn btn-primary w-100"><i class="fa fa-right-to-bracket me-1"></i>Logga in</button>
+</div>
+</form>
