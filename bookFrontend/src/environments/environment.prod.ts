@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://your-production-api-url/api'
+  apiBaseUrl: 'https://bookquotes-api-ajhwe8gdhwf0a7a9.swedencentral-01.azurewebsites.net/api'
 };

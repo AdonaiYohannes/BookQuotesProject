@@ -90,7 +90,7 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // ---------- Middleware order ----------
-app.UseCors("ng"); // ✅ Must match AddCors policy name
+app.UseCors("ng"); 
 
 app.UseSwagger();
 app.UseSwaggerUI();

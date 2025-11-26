@@ -16,3 +16,10 @@ node_modules/
 dist/
 .angular/
 
+# Backend publish output
+backend/BookQuotes.Api/publish/
+
+# Backend deployment zips
+backend/BookQuotes.Api/*.zip
+
+
