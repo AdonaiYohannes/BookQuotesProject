@@ -48,7 +48,9 @@ builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ng", p => p
-        .WithOrigins("http://localhost:4200")
+        .WithOrigins(
+            "http://localhost:4200",
+            "https://bookquote-client-fkewase3ezasfdc0.swedencentral-01.azurewebsites.net")
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials()
@@ -88,6 +90,13 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+// ---------- Ensure SQLite DB exists ----------
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated(); // creates bookquotes.db and tables if missing
+}
 
 // ---------- Middleware order ----------
 app.UseCors("ng"); 

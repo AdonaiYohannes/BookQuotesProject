@@ -28,7 +28,7 @@ export class BookFormComponent implements OnInit {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(120)]],
       author: ['', [Validators.required, Validators.maxLength(80)]],
-      published: ['', Validators.required]
+      published: ['']
     });
   }
 
@@ -42,8 +42,24 @@ export class BookFormComponent implements OnInit {
   }
 
   submit() {
-    const payload = this.form.value as any;
-    const obs = this.id ? this.api.update(this.id, payload) : this.api.create(payload);
-    obs.subscribe({ next: () => this.router.navigate(['/']) });
+    const value = this.form.value;
+
+    const payload = {
+      title: value.title,
+      author: value.author,
+      // if published is empty string, send null
+      published: value.published && value.published !== '' ? value.published : null
+    };
+
+    const obs = this.id
+      ? this.api.update(this.id, payload)
+      : this.api.create(payload);
+
+    obs.subscribe({
+      next: () => this.router.navigate(['/']),
+      error: err => {
+        console.error('Failed to save book', err);
+      }
+    });
   }
 }

@@ -4,7 +4,7 @@ import { environment } from '../../environments/environment';
 
 
 export interface Book { id: number; title: string; author: string; published: string | null; }
-export interface CreateBook { title: string; author: string; published: string; }
+export interface CreateBook { title: string; author: string; published: string | null; }
 
 
 @Injectable({ providedIn: 'root' })

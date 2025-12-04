@@ -37,7 +37,7 @@ export class BookListComponent implements OnInit {
     console.log('[BookList] Fetching books...');
     this.loading = true;
     this.error = undefined;
-    this.cdr.detectChanges();  // 👈 ADD THIS
+    this.cdr.detectChanges();
 
     this.api.getAll().subscribe({
       next: res => {
@@ -45,13 +45,13 @@ export class BookListComponent implements OnInit {
         this.books = res;
         console.log('[BookList] Number of books:', this.books.length);
         this.loading = false;
-        this.cdr.detectChanges();  // 👈 ADD THIS
+        this.cdr.detectChanges();
       },
       error: err => {
         console.error('[BookList] Error fetching books', err);
         this.error = 'Kunde inte hämta böcker.';
         this.loading = false;
-        this.cdr.detectChanges();  // 👈 ADD THIS
+        this.cdr.detectChanges();
       }
     });
   }
@@ -67,7 +67,7 @@ export class BookListComponent implements OnInit {
       error: err => {
         console.error('[BookList] Error deleting book', err);
         this.error = 'Kunde inte radera boken.';
-        this.cdr.detectChanges();  // 👈 ADD THIS
+        this.cdr.detectChanges();
       }
     });
   }
