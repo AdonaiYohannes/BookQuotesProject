@@ -23,6 +23,7 @@ export interface RegisterRequest {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private key = 'jwt_token';
+  private userNameKey = 'user_name';
   private base = environment.apiBaseUrl + '/auth';
   private readonly isBrowser: boolean;
 
@@ -63,5 +64,77 @@ export class AuthService {
 
   logout(): void {
     this.token = null;
+    if (this.isBrowser) {
+      sessionStorage.removeItem(this.userNameKey);
+    } 
+  }
+
+   // ===== ✅ NEW METHODS FOR USER INFO =====
+
+  // Extracts and returns the current user's ID from the JWT token
+  getCurrentUserId(): number | null {
+    if (!this.isBrowser) return null;
+    
+    const token = this.token;
+    if (!token) return null;
+
+    try {
+      // Decode JWT token (format: header.payload.signature)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+      
+      // JWT can use different claim names for user ID
+      // Check common JWT claim names
+      const userId = payload.sub || 
+                     payload.nameid || 
+                     payload.NameIdentifier ||
+                     payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+      
+      return userId ? parseInt(userId, 10) : null;
+    } catch (error) {
+      console.error('[AuthService] Error decoding token:', error);
+      return null;
+    }
+  }
+
+  
+  // Returns the current user's username
+  getCurrentUserName(): string | null {
+    if (!this.isBrowser) return null;
+    return sessionStorage.getItem(this.userNameKey);
+  }
+
+  
+  // Saves the username to session storage (call this after successful login)
+  setUserName(userName: string): void {
+    if (!this.isBrowser) return;
+    sessionStorage.setItem(this.userNameKey, userName);
+  }
+
+  
+  // Extracts username from JWT token if not stored separately
+  getUserNameFromToken(): string | null {
+    if (!this.isBrowser) return null;
+    
+    const token = this.token;
+    if (!token) return null;
+
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+      
+      // Check common JWT claim names for username
+      return payload.unique_name || 
+             payload.name || 
+             payload.UserName ||
+             payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
+             null;
+    } catch (error) {
+      console.error('[AuthService] Error decoding token:', error);
+      return null;
+    }
   }
 }
+

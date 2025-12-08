@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
 import { BookService, Book } from '../../Services/book.service';
+import { AuthService } from '../../Services/auth.service';
 
 @Component({
   standalone: true,
@@ -17,10 +18,12 @@ export class BookListComponent implements OnInit {
   books: Book[] = [];
   error?: string;
   private isBrowser: boolean;
+  currentUserId: number | null = null;
 
   constructor(
     private api: BookService,
-    private cdr: ChangeDetectorRef,  // 👈 ADD THIS
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -29,6 +32,7 @@ export class BookListComponent implements OnInit {
   ngOnInit() {
     console.log('[BookList] Component initialized, isBrowser =', this.isBrowser);
     if (this.isBrowser) {
+      this.currentUserId = this.authService.getCurrentUserId();
       this.fetch();
     }
   }
@@ -56,6 +60,10 @@ export class BookListComponent implements OnInit {
     });
   }
 
+    // Check if the book belongs to the current user
+   isMyBook(book: Book): boolean {
+    return this.currentUserId === book.userId;
+  }
   remove(id: number) {
     if (!confirm('Är du säker att du vill radera boken?')) return;
 

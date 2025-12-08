@@ -1,24 +1,30 @@
 <div class="container py-4">
+  <!-- Header with toggle button -->
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="m-0">Mina citat</h2>
-    <span class="text-muted">Hantera dina favoritcitat</span>
+    <h2 class="m-0">{{ showAllQuotes ? 'Alla citat' : 'Mina citat' }}</h2>
+    <button class="btn btn-outline-primary" (click)="toggleView()">
+      <i class="fa" [ngClass]="showAllQuotes ? 'fa-user' : 'fa-users'"></i>
+      {{ showAllQuotes ? 'Visa mina citat' : 'Visa alla citat' }}
+    </button>
   </div>
 
-  <!-- Lägg till nytt citat -->
-  <div class="card mb-4 p-3">
+  <!-- Add new quote form (only show when in "my quotes" view) -->
+  <div class="card mb-4 p-3" *ngIf="!showAllQuotes">
+    <h5 class="mb-3">Lägg till nytt citat</h5>
     <form class="row g-3" (ngSubmit)="add()">
-      <div class="col-12 col-md-8">
-        <label class="form-label">Citat</label>
+      <div class="col-12">
+        <label class="form-label">Citat *</label>
         <textarea
           class="form-control"
           rows="3"
           [(ngModel)]="newQuote.text"
           name="newText"
-          placeholder="&quot;quote &quot;"
+          placeholder="&quot;Skriv ditt citat här&quot;"
+          required
         ></textarea>
       </div>
 
-      <div class="col-12 col-md-3">
+      <div class="col-md-6">
         <label class="form-label">Författare</label>
         <input
           class="form-control"
@@ -29,31 +35,69 @@
         />
       </div>
 
-      <div class="col-12 col-md-1 d-flex align-items-end">
-        <button class="btn btn-primary w-100" type="submit">
-          Lägg till
+      <div class="col-md-6">
+        <label class="form-label">Källa</label>
+        <input
+          class="form-control"
+          type="text"
+          [(ngModel)]="newQuote.source"
+          name="newSource"
+          placeholder="Bok, sida, etc."
+        />
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-primary" type="submit">
+          <i class="fa fa-plus me-1"></i>
+          Lägg till citat
         </button>
       </div>
     </form>
   </div>
 
+  <!-- No quotes message -->
+  <div *ngIf="quotes.length === 0" class="alert alert-info">
+    <i class="fa fa-info-circle me-2"></i>
+    {{ showAllQuotes ? 'Inga citat finns ännu.' : 'Du har inga citat ännu. Lägg till ditt första citat ovan!' }}
+  </div>
+
   <!-- Lista av citat -->
   <div *ngFor="let q of quotes" class="card mb-3 p-3">
+    <!-- Show who added it -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="badge bg-secondary">
+        <i class="fa fa-user me-1"></i>
+        {{q.addedBy}}
+      </span>
+      <span class="text-muted small" *ngIf="isMyQuote(q)">
+        <i class="fa fa-check-circle text-success me-1"></i>
+        Ditt citat
+      </span>
+    </div>
+    
     <!-- Visningsläge -->
     <ng-container *ngIf="editingId !== q.id; else editTpl">
-      <div class="fw-semibold mb-1">"{{ q.text }}"</div>
-      <div class="text-muted small mb-2">
-        {{
-          q.author && q.author.trim()
-            ? q.author
-            : '(Okänd författare)'
-        }}
+      <div class="fw-semibold mb-2">"{{ q.text }}"</div>
+      
+      <div class="d-flex gap-3 text-muted small mb-2">
+        <span *ngIf="q.author && q.author.trim()">
+          <i class="fa fa-user-circle me-1"></i>
+          {{ q.author }}
+        </span>
+        <span *ngIf="q.source && q.source.trim()">
+          <i class="fa fa-book me-1"></i>
+          {{ q.source }}
+        </span>
       </div>
-      <div class="d-flex gap-2">
+      
+      <!-- Only show edit/delete for user's own quotes -->
+      <div class="d-flex gap-2" *ngIf="isMyQuote(q)">
         <button class="btn btn-sm btn-outline-secondary" (click)="startEdit(q)">
+          <i class="fa fa-pen me-1"></i>
           Redigera
         </button>
         <button class="btn btn-sm btn-outline-danger" (click)="remove(q.id)">
+          <i class="fa fa-trash me-1"></i>
           Ta bort
         </button>
       </div>
@@ -71,7 +115,7 @@
         ></textarea>
       </div>
       <div class="mb-2">
-        <label class="form-label">Författare (valfritt)</label>
+        <label class="form-label">Författare</label>
         <input
           class="form-control"
           type="text"
@@ -79,11 +123,22 @@
           name="editAuthor{{ q.id }}"
         />
       </div>
+      <div class="mb-2">
+        <label class="form-label">Källa</label>
+        <input
+          class="form-control"
+          type="text"
+          [(ngModel)]="editCache.source"
+          name="editSource{{ q.id }}"
+        />
+      </div>
       <div class="d-flex gap-2">
         <button class="btn btn-sm btn-success" (click)="save(q.id)">
+          <i class="fa fa-check me-1"></i>
           Spara
         </button>
         <button class="btn btn-sm btn-outline-secondary" (click)="cancel()">
+          <i class="fa fa-times me-1"></i>
           Avbryt
         </button>
       </div>

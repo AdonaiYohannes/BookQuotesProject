@@ -9,4 +9,6 @@ public class Book
 
     // Användare som har lagt till boken
     public int UserId {get; set;}
+
+    public User User {get; set;} = null!;
 }

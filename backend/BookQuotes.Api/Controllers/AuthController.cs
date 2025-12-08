@@ -58,6 +58,6 @@ public class AuthController : ControllerBase
             return Unauthorized();
 
         var token = _auth.CreateToken(user.UserName, user.Id);
-        return Ok(new AuthResponse(token, user.UserName));
+        return Ok(new AuthResponse(token, user.UserName, user.Id));
     }
 }

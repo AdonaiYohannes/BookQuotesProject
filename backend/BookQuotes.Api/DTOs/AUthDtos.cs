@@ -20,5 +20,5 @@ public record RegisterRequest
 }
 
 public record LoginRequest([Required] string UserName, [Required] string Password);
-public record AuthResponse(string Token, string UserName);
+public record AuthResponse(string Token, string UserName, int UserId);
 public record RegisterResponse(int Id, string UserName, string? Email);

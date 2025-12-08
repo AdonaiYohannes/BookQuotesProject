@@ -37,13 +37,42 @@ public class BooksController : ControllerBase
     }
     
 
+    // GET all books (changed to show ALL books from all users)
     [HttpGet]
     public async Task<IActionResult> GetBooks()
     {
         var userId = GetUserId();
         var books = await _db.Books
+            .Include(b => b.User) 
+            .OrderByDescending(b => b.Id)
+            .Select(b => new BookDto(
+                b.Id, 
+                b.Title, 
+                b.Author, 
+                b.Published,
+                b.User.UserName, 
+                b.UserId         
+            ))
+            .ToListAsync();
+        return Ok(books);
+    }
+
+    // GET my books only (new endpoint)
+    [HttpGet ("my-books")]
+    public async Task<IActionResult> GetMyBooks()
+    {
+        var userId = GetUserId();
+        var books = await _db.Books
+            .Include(b => b.User)
             .Where(b => b.UserId == userId)
-            .Select(b => new BookDto(b.Id, b.Title, b.Author, b.Published))
+            .OrderByDescending(b => b.Id)
+            .Select(b => new BookDto(
+                b.Id, 
+                b.Title, 
+                b.Author, 
+                b.Published, 
+                b.User.UserName, 
+                b.UserId))
             .ToListAsync();
         return Ok(books);
     }
@@ -52,6 +81,8 @@ public class BooksController : ControllerBase
     public async Task<IActionResult> CreateBook(BookCreateUpdateDto dto)
     {
         var userId = GetUserId();
+        var user = await _db.Users.FindAsync(userId);
+
         var book = new Book
         {
             Title = dto.Title,
@@ -64,30 +95,42 @@ public class BooksController : ControllerBase
         await _db.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetBooks), new { id = book.Id },
-            new BookDto(book.Id, book.Title, book.Author, book.Published));
+            new BookDto(book.Id, book.Title, book.Author, book.Published, user!.UserName, userId));
     }
 
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateBook(int id, BookCreateUpdateDto dto)
     {
         var userId = GetUserId();
-        var book = await _db.Books.FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
+        var book = await _db.Books
+            .Include(b => b.User)
+            .FirstOrDefaultAsync(b => b.Id == id);
+
         if (book is null) return NotFound();
+
+        // Only owner can update
+        if (book.UserId != userId) 
+            return Forbid(); // 403 Forbidden
 
         book.Title = dto.Title;
         book.Author = dto.Author;
         book.Published = dto.Published;
 
         await _db.SaveChangesAsync();
-        return Ok(new BookDto(book.Id, book.Title, book.Author, book.Published));
+        return Ok(new BookDto(book.Id, book.Title, book.Author, book.Published, book.User.UserName, book.UserId));
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteBook(int id)
     {
         var userId = GetUserId();
-        var book = await _db.Books.FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
+        var book = await _db.Books.FirstOrDefaultAsync(b => b.Id == id);
+
         if (book is null) return NotFound();
+
+        // Only owner can delete
+        if (book.UserId != userId) 
+            return Forbid(); // 403 Forbidden
 
         _db.Books.Remove(book);
         await _db.SaveChangesAsync();

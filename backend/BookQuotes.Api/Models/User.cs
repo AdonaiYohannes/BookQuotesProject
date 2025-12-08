@@ -13,4 +13,7 @@ public class User
     public byte[] PasswordSalt {get; set;} = System.Array.Empty<byte>();
 
     public System.DateTime CreatedAt {get; set;} = System.DateTime.UtcNow;
+
+    public ICollection<Book> Books {get; set;} = new List<Book>();
+    public ICollection<Quote> Quotes {get; set;} = new List<Quote>();
 }

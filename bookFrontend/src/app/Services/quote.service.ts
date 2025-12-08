@@ -7,6 +7,8 @@ export interface Quote {
   text: string;
   author: string | null;        
   source?: string | null;
+  addedBy: string;
+  userId: number;
 }
 
 export interface CreateQuote {
@@ -23,6 +25,10 @@ export class QuoteService {
 
   getAll() {
     return this.http.get<Quote[]>(this.base);
+  }
+
+  getMyQuotes() {
+    return this.http.get<Quote[]>(`${this.base}/my-quotes`);
   }
 
   create(payload: CreateQuote) {

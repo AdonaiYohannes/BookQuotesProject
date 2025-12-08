@@ -15,6 +15,7 @@
         <th>Titel</th>
         <th>Författare</th>
         <th>Publiceringsdatum</th>
+        <th>Tillagd av</th>
         <th class="text-end">Åtgärder</th>
       </tr>
     </thead>
@@ -23,13 +24,18 @@
         <td>{{b.title}}</td>
         <td>{{b.author}}</td>
         <td>{{b.published | date:'yyyy-MM-dd'}}</td>
+        <td><span class="badge bg-secondary">{{b.addedBy}}</span></td>
         <td class="text-end">
-          <a [routerLink]="['/book', b.id]" class="btn btn-sm btn-outline-secondary me-2">
-            <i class="fa fa-pen"></i>
-          </a>
-          <button class="btn btn-sm btn-outline-danger" (click)="remove(b.id)">
-            <i class="fa fa-trash"></i>
-          </button>
+          <!-- Will only show edit/delete buttons if current user owns the book -->
+          <ng-container *ngIf="isMyBook(b)">
+            <a [routerLink]="['/book', b.id]" class="btn btn-sm btn-outline-secondary me-2">
+              <i class="fa fa-pen"></i>
+            </a>
+            <button class="btn btn-sm btn-outline-danger" (click)="remove(b.id)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </ng-container>
+          <span *ngIf="!isMyBook(b)" class="text-muted small">—</span>
         </td>
       </tr>
     </tbody>
