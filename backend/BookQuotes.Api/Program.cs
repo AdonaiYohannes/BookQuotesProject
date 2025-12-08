@@ -47,14 +47,13 @@ builder.Services.AddControllers();
 // ---------- CORS (Angular dev) ----------
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("ng", p => p
+    options.AddPolicy("corspolicy", policy => policy
         .WithOrigins(
             "http://localhost:4200",
             "https://bookquote-client-fkewase3ezasfdc0.swedencentral-01.azurewebsites.net")
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .AllowCredentials()
-        .WithExposedHeaders("Authorization"));
+        );
 });
 
 // ---------- Swagger ----------
@@ -98,14 +97,16 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated(); // creates bookquotes.db and tables if missing
 }
 
-// ---------- Middleware order ----------
-app.UseCors("ng"); 
+app.UseHttpsRedirection();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// ---------- Middleware order ----------
+app.UseCors("corspolicy"); 
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapControllers();
 

@@ -20,6 +20,9 @@ dist/
 backend/BookQuotes.Api/publish/
 
 # Backend deployment zips
-backend/BookQuotes.Api/*.zip
+bookFrontend/frontend-build.zip
+
+#fronend
+bookFrontend/dist/
 
 
