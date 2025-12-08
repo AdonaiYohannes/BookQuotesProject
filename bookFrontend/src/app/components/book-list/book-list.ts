@@ -20,6 +20,9 @@ export class BookListComponent implements OnInit {
   private isBrowser: boolean;
   currentUserId: number | null = null;
 
+  // NEW: controls whether we show all books or only my books
+  showAllBooks = true;
+
   constructor(
     private api: BookService,
     private authService: AuthService,
@@ -33,17 +36,23 @@ export class BookListComponent implements OnInit {
     console.log('[BookList] Component initialized, isBrowser =', this.isBrowser);
     if (this.isBrowser) {
       this.currentUserId = this.authService.getCurrentUserId();
+      console.log('[BookList] currentUserId from AuthService =', this.currentUserId);
       this.fetch();
     }
   }
 
   fetch() {
-    console.log('[BookList] Fetching books...');
+    console.log('[BookList] Fetching books... showAllBooks =', this.showAllBooks);
     this.loading = true;
     this.error = undefined;
     this.cdr.detectChanges();
 
-    this.api.getAll().subscribe({
+    const obs = this.showAllBooks
+      ? this.api.getAll()      // ALL books
+      : this.api.getMyBooks(); // only MY books
+
+    this.api.getAll().subscribe
+    obs.subscribe({
       next: res => {
         console.log('[BookList] Received response:', res);
         this.books = res;
@@ -60,10 +69,20 @@ export class BookListComponent implements OnInit {
     });
   }
 
-    // Check if the book belongs to the current user
-   isMyBook(book: Book): boolean {
+  // NEW: switch between "alla böcker" and "mina böcker"
+  setView(showAll: boolean) {
+    if (this.showAllBooks === showAll) return;
+    this.showAllBooks = showAll;
+    console.log('[BookList] setView →', this.showAllBooks ? 'ALLA BÖCKER' : 'MINA BÖCKER');
+    this.fetch();
+  }
+
+  // Check if the book belongs to the current user
+  isMyBook(book: Book): boolean {
+    if (this.currentUserId == null) return false;
     return this.currentUserId === book.userId;
   }
+
   remove(id: number) {
     if (!confirm('Är du säker att du vill radera boken?')) return;
 
