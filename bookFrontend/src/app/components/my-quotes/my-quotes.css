@@ -1,0 +1,30 @@
+:host { display: block; }
+
+/* Ensure table has proper background in dark mode */
+.table {
+  background-color: #ffffff;
+}
+
+[data-theme="dark"] .table {
+  background-color: #1e293b;
+  color: #e5e7eb;
+}
+
+form-label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Ensure quote text is visible */
+[data-theme="dark"] .fw-semibold {
+  color: #f1f5f9;
+}
+
+/* Ensure striped rows work in dark mode */
+[data-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Ensure badges are visible */
+[data-theme="dark"] .badge.bg-secondary {
+  background-color: #64748b !important;
+}

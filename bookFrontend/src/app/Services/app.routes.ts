@@ -15,6 +15,7 @@ export const routes: Routes = [
 
 
 // Quotes
+{ path: 'my-quote/new', canActivate: [AuthGuard], loadComponent: () => import('../components/my-quotes/my-quotes').then(m => m.MyQuotesComponent) },
 { path: 'my-quotes', canActivate: [AuthGuard], loadComponent: () => import('../components/my-quotes/my-quotes').then(m => m.MyQuotesComponent) },
 
 

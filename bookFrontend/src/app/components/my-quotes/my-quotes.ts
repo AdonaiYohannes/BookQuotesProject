@@ -1,13 +1,15 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { QuoteService, Quote, CreateQuote } from '../../Services/quote.service';
 import { AuthService } from '../../Services/auth.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   standalone: true,
   selector: 'app-my-quotes',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './my-quotes.html',
   styleUrl: './my-quotes.css'
 })
@@ -15,6 +17,7 @@ export class MyQuotesComponent implements OnInit {
   quotes: Quote[] = [];
   // Start with all quotes
   showAllQuotes = true;
+  isNewQuotePage = false;
   currentUserId: number | null = null;
 
   newQuote: { text: string; author: string; source?: string } = {
@@ -33,20 +36,41 @@ export class MyQuotesComponent implements OnInit {
   constructor(
     private api: QuoteService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    console.log('[MyQuotes] ngOnInit – fetching quotes…');
+    console.log('[MyQuotes] ngOnInit');
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('[MyQuotes] currentUserId from AuthService =', this.currentUserId);
+
+    this.updateModeFromUrl();
+
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => this.updateModeFromUrl());
+  }
+
+  private updateModeFromUrl(): void {
+    this.isNewQuotePage = this.router.url.startsWith('/my-quote/new');
+    console.log('[MyQuotes] isNewQuotePage =', this.isNewQuotePage, 'url=', this.router.url);
+
+    if (this.isNewQuotePage) {
+      // Reset form when entering the "new" page
+      this.newQuote = { text: '', author: '', source: '' };
+      this.editingId = undefined;
+      this.editCache = { text: '', author: '', source: '' };
+      return;
+    }
+
     this.fetch();
   }
 
   fetch(): void {
     const obs = this.showAllQuotes
-      ? this.api.getAll()       // Show all quotes
-      : this.api.getMyQuotes(); // Show only my quotes
+      ? this.api.getAll()   
+      : this.api.getMyQuotes(); 
 
     console.log('[MyQuotes] fetch – showAllQuotes =', this.showAllQuotes);
 
@@ -54,17 +78,6 @@ export class MyQuotesComponent implements OnInit {
       next: (res) => {
         console.log('[MyQuotes] received quotes:', res);
         this.quotes = res;
-
-        console.table(
-          this.quotes.map(q => ({
-            id: (q as any).id,
-            text: q.text,
-            userId: (q as any).userId,
-            author: q.author,
-            source: q.source
-          }))
-        );
-
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -73,7 +86,6 @@ export class MyQuotesComponent implements OnInit {
     });
   }
 
-  // New: explicit view switcher
   setView(showAll: boolean): void {
     if (this.showAllQuotes === showAll) return;
     this.showAllQuotes = showAll;
@@ -81,29 +93,11 @@ export class MyQuotesComponent implements OnInit {
     this.fetch();
   }
 
-  // Checks if the quote belongs to the current user
   isMyQuote(quote: Quote): boolean {
-    if (this.currentUserId == null) {
-      console.log('[MyQuotes] isMyQuote → false (no currentUserId)', {
-        currentUserId: this.currentUserId,
-        quoteId: (quote as any).id,
-        quoteUserId: (quote as any).userId
-      });
-      return false;
-    }
-
+    if (this.currentUserId == null) return false;
     const current = Number(this.currentUserId);
     const quoteUserId = Number((quote as any).userId);
-    const isOwner = current === quoteUserId;
-
-    console.log('[MyQuotes] isMyQuote check', {
-      currentUserId: current,
-      quoteId: (quote as any).id,
-      quoteUserId: quoteUserId,
-      result: isOwner
-    });
-
-    return isOwner;
+    return current === quoteUserId;
   }
 
   add(): void {
@@ -111,7 +105,7 @@ export class MyQuotesComponent implements OnInit {
     const author = this.newQuote.author?.trim() ?? '';
     const source = this.newQuote.source?.trim() ?? '';
 
-    if (!text) return; // kräver citattext
+    if (!text) return;
 
     const payload: CreateQuote = { text, author, source: source || null };
 
@@ -119,7 +113,14 @@ export class MyQuotesComponent implements OnInit {
       next: (q) => {
         console.log('[MyQuotes] created quote:', q);
         this.newQuote = { text: '', author: '', source: '' };
-        this.fetch(); // Refresh list
+
+        // If we're on the /my-quote/new page, go back to list page after save
+        if (this.isNewQuotePage) {
+          this.router.navigateByUrl('/my-quotes');
+          return;
+        }
+
+        this.fetch();
         this.cdr.detectChanges();
       },
       error: (err) => {
